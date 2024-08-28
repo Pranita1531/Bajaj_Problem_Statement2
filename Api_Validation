@@ -1,0 +1,91 @@
+import requests
+import json
+
+BASE_URL = "https://bfhldevapigw.healthrx.co.in/automation-campus/create/user"
+
+def test_create_user(roll_number, first_name, last_name, phone_number, email_id):
+    headers = {
+        "roll-number": str(roll_number),
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "firstName": first_name,
+        "lastName": last_name,
+        "phoneNumber": phone_number,
+        "emailId": email_id
+    }
+    response = requests.post(BASE_URL, headers=headers, data=json.dumps(payload))
+    print(f"Status Code: {response.status_code}")
+    print(f"Response Body: {response.text}")  
+    return response
+
+def run_tests():
+    # Test case 1: Valid user creation
+    print("Running Test Case 1 - Valid user creation")
+    response = test_create_user(240343120061, "Pranita", "Bhosale", 1234567890, "Pranita.bhosale@gmail.com")
+
+    # Test case 2: Duplicate phone number
+    print("\nRunning Test Case 2 - Duplicate phone number")
+    response = test_create_user(240343120061, "Suraj", "Bhosale", 1234567890, "suraj.bhosale@gmail.com")
+
+    # Test case 3: Missing roll number
+    print("\nRunning Test Case 3 - Missing roll number")
+    headers = {"Content-Type": "application/json"}
+    payload = {
+        "firstName": "Sai",
+        "lastName": "Bhosale",
+        "phoneNumber": 8888888888,
+        "emailId": "sai.bhosale@gmail.com"
+    }
+    response = requests.post(BASE_URL, headers=headers, data=json.dumps(payload))
+    print(f"Status Code: {response.status_code}")
+    print(f"Response Body: {response.text}")
+
+    # Test case 4: Invalid email format
+    print("\nRunning Test Case 4 - Invalid email format")
+    response = test_create_user(240343120061, "Bob", "Bhosale", 7777777777, "invalid-email")
+
+    # Test case 5: Missing required field (firstName)
+    print("\nRunning Test Case 5 - Missing required field (firstName)")
+    headers = {
+        "roll-number": "240343120061",
+        "Content-Type": "application/json"
+    }
+    payload = {
+        "lastName": "Brown",
+        "phoneNumber": 6666666666,
+        "emailId": "charlie.brown@gmail.com"
+    }
+    response = requests.post(BASE_URL, headers=headers, data=json.dumps(payload))
+    print(f"Status Code: {response.status_code}")
+    print(f"Response Body: {response.text}")
+
+    # Test case 6: Duplicate emailId
+    print("\nRunning Test Case 6 - Duplicate emailId")
+    response = test_create_user(240343120061, "Charlie", "Brown", 5555555555, "Pranita.sahil@gmail.com")
+
+    # Test case 7: Empty request body
+    print("\nRunning Test Case 7 - Empty request body")
+    headers = {
+        "roll-number": "240343120061",
+        "Content-Type": "application/json"
+    }
+    payload = {}
+    response = requests.post(BASE_URL, headers=headers, data=json.dumps(payload))
+    print(f"Status Code: {response.status_code}")
+    print(f"Response Body: {response.text}")
+
+    # Test case 8: SQL Injection Attempt
+    print("\nRunning Test Case 8 - SQL Injection Attempt")
+    response = test_create_user(240343120061, "SQL", "Injection", 1234567892, "sqlinjection@gmail.com' OR '1'='1")
+
+    # Test case 9: XSS Attempt
+    print("\nRunning Test Case 9 - XSS Attempt")
+    response = test_create_user(240343120061, "<script>alert('XSS')</script>", "Test", 1234567893, "xss.attack@gmail.com")
+
+    # Test case 10: Large Input Size
+    print("\nRunning Test Case 10 - Large Input Size")
+    response = test_create_user(240343120061, "A"*10000, "B"*10000, 1234567894, "large.input@gmail.com")
+
+if __name__ == "__main__":
+    run_tests()
